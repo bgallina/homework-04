@@ -1,0 +1,80 @@
+---
+title: "Trump_forras"
+author: "Gallina Beáta"
+date: '2017 május 1 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+##Trump tweetek elemzése - Dokumentáció
+
+Elemzésem ben azzal foglalkozom, hogy Donald Trump a közösségi médiában, azon belül is a Twitteren maga írja-e a bejegyzéseit vagy más teszi helyette. Ehhez az érzelemdetekcióhoz első körben jó kiindulópont lehet, hogy Trump tweetjei különböző forrásokból érkeznek. Hipotézisem tehát, hogy Trump tweetjeit különböző emberek írják és a tweetek legalább két személytől származnak. Elemzésemnek nem tárgya annak vizsgálata, hogy bármelyik bejegyzés Trumptól származik-e, hiszen ehhez további, hosszas adatfelvételre lenne szükség, mely közelítést adna arra, hogy Trump valójában milyen stílusban és milyen érzelmi töltettel felruházva teszi közzé mondanivalóját írásban, vagy szóban. A következőkben azt fogom vizsgálni, hogy a szöveg szentimentjeit tekintve tapasztalható-e eltérés az androidos és az Iphone-ról érkező tweetek között. Először is azzal kezdem, hogy megnézem a Trump tweetek szentimentjeinek gyakoriságát a forrás url bontásában.
+
+```{r}
+szenti_Trump <- table(droplevels(Trump2)$source_url, (Trump2)$text_sentiment)
+szenti_Trump
+```
+
+Ahhoz, hogy vizuálisan is átláthatóbb legyen, készítek egy oszlopdiagramot.
+
+```{r}
+mycols5 <- c("darksalmon", "darkred")
+
+barplot(szenti_Trump, beside = TRUE, border = T, 
+        main = "Tweetek szentimentjei forrás szerint", 
+        ylab = "Tweet frequency", col = mycols5)
+legend("topleft", row.names(szenti_Trump) <- c("Android", "Iphone"), 
+       pch = 15, col = mycols5)
+```
+Szembetűnő különbség, hogy a vörössel jelölt Iphone tweetek polaritásukat tekintve sokkal pozitívabbnak minősülnek.Fontos megjegyezni azonban, hogy az Iphone révén közvetített tweetek sem feltétlenül negatívak, ott is a pozitív esetnél látjuk a legnagyobb gyakoriságot. A középső értéknél viszonylag kevés az esetszám.Felmerül a kérdés ezután, hogy vajon a kettő közötti eltérés szignifikáns vagy sem.
+```{r}
+chisq.test(Trump2$text_sentiment, Trump2$source_url)
+```
+Mivel a p-érték kisebb, mint 0.05, ezért a próba szignifikáns, a változók között van összefüggés és az eltérés nem a véletlen ingadozás műve.Ez alátámasztja azt a hipotézist, mely szerint más forrásból származnak a tweetek.
+
+Ezt követően a tweetek emócióját vizsgálom a forrás szerint.
+```{r}
+emot_Trump <- table(droplevels(Trump2)$source_url, (Trump2)$text_emotion)
+emot_Trump
+```
+Rögtön az első fontos megfigyelés, hogy a legnagyobb esetszám az ismeretlen kategóriában tapasztalható. A két forrásból érkező tweeteket oszlopdiagramon szemléltetem.
+```{r}
+barplot(emot_Trump, beside = TRUE, border = T, 
+        main = "Tweetek emóciói forrás szerint", 
+        ylab = "Tweet frequency", col = mycols5)
+legend("topleft", row.names(emot_Trump) <- c("Android", "Iphone"), 
+       pch = 15, col = mycols5)
+```
+A ploton azt láthatjuk, hogy mindkét forrás esetében viszonylag magas az “öröm” kategóriába sorolt tweetek száma. Minden kategóriában kicsit magasabb értéket vesz fel az Android forrásból származó posztok, de nem tudjuk kimondani egyértelműen, hogy valamelyik forrású tweetek inkább hajlamosak pozitívabb érzelmek hordozására, a másik típusú tweetek pedig inkább negatívnak bizonyulnak. Az, hogy az androidos bejegyzések magasabb értéket vesznek fel minden emóció kategóriában alapvetően annak tudhatók be, hogy jobban beazonosíthatóak, tehát feltételezhetően világosabban, pontosabban fogalmaz az a személy, aki androidról posztol Trump tweeteket, ő valószínűleg jobban tud érzelmeket közvetíteni mondandójával.
+```{r}
+
+chisq.test(Trump2$text_emotion, Trump2$source_url)
+```
+
+A khi-négyzet próbából pedig kiderül, hogy valóban van összefüggés a változók között, hiszen a teszt szignifikáns.
+
+Konklúzió
+A próbák és az adatvizualizációs elemek segítségével alátámasztottam azt a hipotézist, mely szerint Trump tweetjei legalább két forrásból, ezzel együtt legalább két személytől származnak, hiszen a köztül lévő különbség statisztikailag szignifikáns.
